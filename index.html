@@ -2,222 +2,383 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Stempel — Multi Watermark & Sensor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stempel — Watermark & Sensor Generator</title>
     <style>
         :root {
-            /* Palette Dark Mode Modern */
-            --bg-base: #090B10;
-            --bg-panel: #131722;
-            --bg-card: #1A1F2D;
-            --border: #2C3549;
-            --text-main: #F3F4F6;
-            --text-muted: #9CA3AF;
-            --accent-primary: #00E676; /* Neon Mint */
-            --accent-primary-dim: rgba(0, 230, 118, 0.15);
-            --accent-danger: #FF4C4C;
-            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --ink: #0B0D12;
+            --panel: #171B24;
+            --panel-2: #1E2330;
+            --line: #2A3040;
+            --text: #E7E9EE;
+            --muted: #8B93A3;
+            --accent: #F2545B;
+            --accent-2: #4FD1C5;
+            --accent-2-dim: #2E5A56;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
         }
 
         * {
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
         }
 
         html, body {
-            margin: 0; padding: 0;
-            background-color: var(--bg-base);
-            color: var(--text-main);
-            font-family: var(--font-family);
-            overscroll-behavior-y: none; /* Mencegah pull-to-refresh di Android */
+            margin: 0;
+            padding: 0;
+            background: var(--ink);
+            color: var(--text);
         }
 
-        .mono { font-family: 'JetBrains Mono', 'Courier New', monospace; }
+        .mono {
+            font-family: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
+        }
 
-        /* HEADER */
+        .app {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
         header {
-            padding: 16px 20px;
-            background: var(--bg-panel);
-            border-bottom: 1px solid var(--border);
-            display: flex; align-items: center; gap: 14px;
-            position: sticky; top: 0; z-index: 100;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--line);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: linear-gradient(180deg, #12151d, #0f1116);
         }
 
         header .stamp {
-            width: 38px; height: 38px;
-            border: 2px solid var(--accent-primary);
-            border-radius: 10px;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--accent-primary); font-weight: 800; font-size: 14px;
-            transform: rotate(-10deg);
-            box-shadow: 0 0 10px var(--accent-primary-dim);
+            width: 34px;
+            height: 34px;
+            border: 2px solid var(--accent-2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent-2);
+            font-weight: 700;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+            transform: rotate(-8deg);
         }
 
-        header h1 { font-size: 18px; margin: 0; font-weight: 700; letter-spacing: 0.3px; }
-        header p { margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted); }
-
-        /* LAYOUT (Desktop & Mobile) */
-        .layout { display: flex; flex-direction: column; min-height: calc(100vh - 72px); }
-        @media (min-width: 900px) {
-            .layout { flex-direction: row; }
+        header h1 {
+            font-size: 16px;
+            margin: 0;
+            font-weight: 600;
         }
 
-        /* AREA KANVAS & GALERI */
+        header p {
+            margin: 0;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .layout {
+            display: flex;
+            flex: 1;
+            flex-wrap: wrap;
+        }
+
         .stage {
-            flex: 1; padding: 16px;
-            display: flex; flex-direction: column; gap: 12px; align-items: center;
-            background: radial-gradient(circle at 50% 50%, #151924 0%, #090B10 100%);
-            overflow: hidden; /* Biar scroll ada di dalam bungkusnya */
+            flex: 1 1 560px;
+            min-width: 320px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            align-items: center;
+            background: repeating-linear-gradient(45deg, #0d0f14 0 12px, #0a0c10 12px 24px);
         }
 
         .toolbar {
-            width: 100%; max-width: 900px;
-            display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center;
-            background: var(--bg-panel); border: 1px solid var(--border);
-            border-radius: 14px; padding: 10px;
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 8px 10px;
         }
 
         .toolbar .grp {
-            display: flex; gap: 6px; align-items: center;
-            padding-right: 12px; margin-right: 4px; border-right: 1px solid var(--border);
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            padding-right: 10px;
+            margin-right: 6px;
+            border-right: 1px solid var(--line);
         }
-        .toolbar .grp:last-child { border-right: none; padding-right: 0; margin-right: 0; }
-        .toolbar label.mono { font-size: 10px; color: var(--text-muted); font-weight: 600; }
+
+        .toolbar .grp:last-child {
+            border-right: none;
+        }
+
+        .toolbar label.mono {
+            font-size: 11px;
+            color: var(--muted);
+            margin-right: 4px;
+            white-space: nowrap;
+        }
+
+        button {
+            background: var(--panel-2);
+            color: var(--text);
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 7px 11px;
+            font-size: 12.5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all .15s ease;
+        }
+
+        button:hover {
+            border-color: var(--accent-2);
+        }
+
+        button.active {
+            background: var(--accent-2-dim);
+            border-color: var(--accent-2);
+            color: #fff;
+        }
+
+        button.danger:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        button:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        button.primary {
+            background: var(--accent-2);
+            color: #06201d;
+            border-color: var(--accent-2);
+            font-weight: 600;
+        }
+
+        button.primary:hover {
+            filter: brightness(1.08);
+        }
 
         .canvas-wrap {
-            width: 100%; max-width: 900px; flex: 1;
-            overflow: auto; border: 1px solid var(--border);
-            border-radius: 16px; background: #000;
-            display: flex; align-items: center; justify-content: center;
-            min-height: 320px; position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 900px;
+            width: 100%;
+            overflow: auto;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: #05060a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 280px;
+            position: relative;
         }
+
         .canvas-wrap::before {
-            content: ''; position: absolute; inset: 12px; pointer-events: none;
-            border: 2px dashed var(--border); border-radius: 12px; opacity: 0.5;
+            content: '';
+            position: absolute;
+            inset: 8px;
+            pointer-events: none;
+            border: 1px dashed #2a3040;
+            border-radius: 8px;
+            opacity: .6;
         }
-        
-        canvas { display: block; touch-action: none; cursor: crosshair; }
-        .empty-state { color: var(--text-muted); font-size: 14px; text-align: center; padding: 40px; line-height: 1.6; z-index: 10; }
 
-        /* GALERI MULTI-IMAGE */
-        .gallery-wrap {
-            width: 100%; max-width: 900px;
-            background: var(--bg-panel); border: 1px solid var(--border);
-            border-radius: 14px; padding: 12px;
-            display: none; /* Muncul jika ada gambar */
-            align-items: center; gap: 10px; overflow-x: auto;
-            scroll-behavior: smooth;
+        canvas {
+            display: block;
+            touch-action: none;
+            cursor: crosshair;
         }
-        .thumb-list { display: flex; gap: 10px; align-items: center; }
-        .thumb {
-            width: 56px; height: 56px; border-radius: 10px; object-fit: cover;
-            cursor: pointer; border: 2px solid transparent; opacity: 0.5;
-            transition: all 0.2s ease; background: #000; flex-shrink: 0;
-        }
-        .thumb.active { border-color: var(--accent-primary); opacity: 1; transform: scale(1.05); }
-        .thumb-add {
-            width: 56px; height: 56px; flex-shrink: 0;
-            display: flex; align-items: center; justify-content: center;
-            border: 2px dashed var(--border); border-radius: 10px;
-            color: var(--text-muted); cursor: pointer; font-size: 24px;
-            background: var(--bg-card); transition: all 0.2s;
-        }
-        .thumb-add:active { background: var(--border); }
 
-        /* SIDEBAR (PANEL KONTROL) */
+        .empty-state {
+            color: var(--muted);
+            font-size: 13px;
+            text-align: center;
+            padding: 40px;
+        }
+
         .sidebar {
-            width: 100%; max-width: 100%;
-            background: var(--bg-panel); padding: 20px;
-            border-top: 1px solid var(--border);
-            display: flex; flex-direction: column; gap: 24px;
-        }
-        @media (min-width: 900px) {
-            .sidebar { width: 380px; flex: 0 0 380px; border-top: none; border-left: 1px solid var(--border); height: calc(100vh - 72px); overflow-y: auto; }
+            width: 360px;
+            flex: 0 0 360px;
+            max-width: 100%;
+            border-left: 1px solid var(--line);
+            background: var(--panel);
+            padding: 20px;
+            overflow-y: auto;
         }
 
         .section {
-            background: var(--bg-card); border-radius: 16px; padding: 16px;
-            border: 1px solid var(--border);
+            margin-bottom: 22px;
         }
+
         .section h2 {
-            font-size: 12px; text-transform: uppercase; letter-spacing: 1.2px;
-            color: var(--accent-primary); margin: 0 0 16px 0; font-weight: 700;
-            display: flex; align-items: center; gap: 8px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-2);
+            margin: 0 0 10px 0;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
+
         .section h2::before {
-            content: ''; width: 8px; height: 8px; background: var(--accent-primary);
-            border-radius: 2px; transform: rotate(45deg);
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--accent-2);
+            border-radius: 1px;
+            transform: rotate(45deg);
         }
 
-        .field { margin-bottom: 16px; }
-        .field label { display: flex; justify-content: space-between; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
-        .field label .val { color: var(--accent-primary); font-weight: 600; font-family: 'JetBrains Mono', monospace; }
+        .field {
+            margin-bottom: 12px;
+        }
 
-        /* Elemen Form ramah sentuhan (Touch-Friendly) */
+        .field label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--muted);
+            margin-bottom: 5px;
+        }
+
+        .field label .val {
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
         input[type=text], select {
-            width: 100%; background: var(--bg-base); border: 1px solid var(--border);
-            color: var(--text-main); padding: 12px 14px; border-radius: 10px;
-            font-size: 14px; outline: none; transition: border 0.2s;
-        }
-        input[type=text]:focus, select:focus { border-color: var(--accent-primary); }
-        
-        /* Slider Kustom (Besar untuk Jari) */
-        input[type=range] {
-            -webkit-appearance: none; width: 100%; background: transparent; margin: 8px 0;
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 6px; cursor: pointer; background: var(--border); border-radius: 4px;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 22px; width: 22px; border-radius: 50%;
-            background: var(--accent-primary); cursor: pointer; margin-top: -8px;
-            box-shadow: 0 0 10px var(--accent-primary-dim);
-        }
-        input[type=color] {
-            width: 100%; height: 44px; background: var(--bg-base);
-            border: 1px solid var(--border); border-radius: 10px; padding: 4px; cursor: pointer;
+            width: 100%;
+            background: var(--panel-2);
+            border: 1px solid var(--line);
+            color: var(--text);
+            padding: 8px 9px;
+            border-radius: 7px;
+            font-size: 13px;
         }
 
-        /* Tombol & Layout */
-        button {
-            background: var(--bg-base); color: var(--text-main);
-            border: 1px solid var(--border); border-radius: 10px;
-            padding: 10px 14px; font-size: 13px; font-weight: 500;
-            cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;
-            transition: all .2s ease; outline: none; min-height: 40px; /* Minimal touch target */
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--accent-2);
         }
-        button:active { transform: scale(0.97); }
-        button:hover { border-color: var(--text-muted); }
-        button.active { background: var(--accent-primary-dim); border-color: var(--accent-primary); color: var(--accent-primary); font-weight: 600; }
-        button.danger { color: var(--accent-danger); }
-        button.danger:hover, button.danger:active { border-color: var(--accent-danger); background: rgba(255, 76, 76, 0.1); }
-        button:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
-        
-        button.primary { background: var(--accent-primary); color: #00331A; border-color: var(--accent-primary); font-weight: 700; font-size: 14px; }
-        
-        .row2 { display: flex; gap: 10px; }
-        .row2 > * { flex: 1; }
+
+        input[type=color] {
+            width: 100%;
+            height: 34px;
+            background: var(--panel-2);
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 2px;
+            cursor: pointer;
+        }
+
+        .row2 {
+            display: flex;
+            gap: 8px;
+        }
+
+        .row2 > * {
+            flex: 1;
+        }
+
+        .toggle-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .toggle-row button {
+            flex: 1;
+            justify-content: center;
+        }
 
         .dropzone {
-            border: 2px dashed var(--border); border-radius: 12px; padding: 24px 16px;
-            text-align: center; font-size: 14px; color: var(--text-muted); cursor: pointer;
-            background: var(--bg-base); transition: all 0.2s;
+            border: 1.5px dashed var(--line);
+            border-radius: 10px;
+            padding: 22px 14px;
+            text-align: center;
+            font-size: 12.5px;
+            color: var(--muted);
+            cursor: pointer;
         }
-        .dropzone:active { border-color: var(--accent-primary); background: var(--accent-primary-dim); }
 
-        .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-        .presets button { flex: 1 1 calc(50% - 8px); font-size: 12px; }
+        .dropzone:hover {
+            border-color: var(--accent-2);
+            color: var(--text);
+        }
 
-        .custom-preset-row { display: flex; gap: 6px; margin-bottom: 6px; }
-        .custom-preset-row button.preset-btn { flex: 1; justify-content: flex-start; }
-        .custom-preset-row button.del-btn { padding: 10px; flex: 0 0 44px; }
+        .dropzone.dragover {
+            border-color: var(--accent-2);
+            background: var(--panel-2);
+        }
 
-        .pos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-        .pos-grid button { aspect-ratio: 1; font-size: 14px; padding: 0; }
+        .presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
 
-        footer.note { font-size: 12px; color: var(--text-muted); line-height: 1.6; padding-top: 10px; border-top: 1px solid var(--border); text-align: center;}
+        .presets button {
+            font-size: 11.5px;
+            padding: 6px 9px;
+        }
+
+        .custom-preset-row {
+            display: flex;
+            gap: 4px;
+            width: 100%;
+        }
+
+        .custom-preset-row button.preset-btn {
+            flex: 1;
+            justify-content: flex-start;
+        }
+        
+        .custom-preset-row button.del-btn {
+            padding: 6px 10px;
+        }
+
+        .pos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .pos-grid button {
+            aspect-ratio: 1;
+            justify-content: center;
+            font-size: 10px;
+            padding: 0;
+        }
+
+        footer.note {
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.5;
+            padding-top: 6px;
+            border-top: 1px solid var(--line);
+        }
+
+        @media (max-width: 860px) {
+            .sidebar {
+                border-left: none;
+                border-top: 1px solid var(--line);
+                width: 100%;
+                flex: 1 1 auto;
+            }
+        }
     </style>
 </head>
 <body>
@@ -225,92 +386,71 @@
         <header>
             <div class="stamp">WM</div>
             <div>
-                <h1>Stempel Pro</h1>
-                <p>Multi Watermark & Sensor Gambar</p>
+                <h1>Watermark &amp; Sensor Generator</h1>
+                <p>Tempel watermark berulang, sensor data sensitif, unduh hasilnya.</p>
             </div>
         </header>
         <div class="layout">
             <div class="stage">
                 <div class="toolbar" id="toolbar">
                     <div class="grp">
-                        <label class="mono">ALAT</label>
-                        <button id="toolNone" class="active" title="Mode Pilih">Pilih</button>
-                        <button id="toolBox" title="Kotak Sensor">▭ Sensor</button>
-                        <button id="toolFree" title="Coret Bebas">✎ Coret</button>
+                        <label class="mono">SENSOR</label>
+                        <button id="toolBox" title="Kotak sensor">▭ Kotak</button>
+                        <button id="toolFree" title="Coret bebas">✎ Coret</button>
+                        <button id="toolNone" class="active" title="Mode lihat">↖ Pilih</button>
                     </div>
                     <div class="grp">
                         <button id="undoBtn" disabled>↶ Undo</button>
-                        <button id="clearBtn" class="danger" disabled>🗑 Hapus</button>
+                        <button id="clearBtn" class="danger" disabled>🗑 Hapus semua</button>
                     </div>
-                    <div class="grp" style="flex:1; justify-content: flex-end; border:none;">
+                    <div class="grp">
                         <label class="mono">ZOOM</label>
-                        <input type="range" id="zoom" min="20" max="200" value="60" style="max-width:120px">
+                        <input type="range" id="zoom" min="40" max="150" value="100" style="width:100px">
+                    </div>
+                    <div class="grp">
+                        <button id="resetImgBtn" disabled>↻ Reset gambar</button>
                     </div>
                 </div>
-                
                 <div class="canvas-wrap" id="canvasWrap">
-                    <div class="empty-state" id="emptyState">
-                        <span style="font-size: 32px; display:block; margin-bottom:10px;">📸</span>
-                        Pilih satu atau banyak gambar di panel bawah<br>untuk mulai mengedit.
-                    </div>
-                    <canvas id="canvas" style="display:none; width: 60%;"></canvas>
-                </div>
-
-                <!-- GALERI THUMBNAIL (Bawah Kanvas) -->
-                <div class="gallery-wrap" id="galleryWrap">
-                    <div class="thumb-list" id="galleryThumbs"></div>
+                    <div class="empty-state" id="emptyState">Unggah gambar dulu di panel kanan →<br>lalu mulai tambahkan watermark atau sensor.</div>
+                    <canvas id="canvas" style="display:none;"></canvas>
                 </div>
             </div>
-
             <div class="sidebar">
                 <div class="section">
-                    <h2>Input Gambar</h2>
+                    <h2>Gambar</h2>
                     <div class="dropzone" id="dropzone">
-                        Ketuk untuk Pilih Gambar<br><span class="mono" style="font-size:11px; opacity:0.7;">Pilih banyak sekaligus (JPG/PNG)</span>
+                        Klik atau seret gambar ke sini<br><span class="mono" style="font-size:10.5px">JPG · PNG · WebP</span>
                     </div>
-                    <!-- multiple attribute agar bisa pilih banyak gambar -->
-                    <input type="file" id="fileInput" accept="image/*" multiple style="display:none">
+                    <input type="file" id="fileInput" accept="image/*" style="display:none">
                 </div>
-
                 <div class="section">
-                    <h2>Teks Watermark</h2>
+                    <h2>Teks watermark</h2>
                     <div class="field">
-                        <input type="text" id="wmText" value="CONFIDENTIAL" placeholder="Tulis teks watermark…">
+                        <input type="text" id="wmText" value="MAIL STORE" placeholder="Tulis teks watermark…">
                     </div>
-                    <div class="row2" style="margin-bottom:16px;">
-                        <button id="modeTiled" class="active">Pola Penuh</button>
-                        <button id="modeSingle">Satu Posisi</button>
+                    <div class="toggle-row" style="margin-bottom:12px;">
+                        <button id="modeTiled" class="active">Pola berulang</button>
+                        <button id="modeSingle">Satu posisi</button>
                     </div>
-                    <div id="posGridWrap" style="display:none; margin-bottom:16px;">
+                    <div id="posGridWrap" style="display:none; margin-bottom:12px;">
                         <div class="pos-grid" id="posGrid">
                             <button data-pos="top-left">↖</button><button data-pos="top-center">↑</button><button data-pos="top-right">↗</button>
                             <button data-pos="mid-left">←</button><button data-pos="center" class="active">●</button><button data-pos="mid-right">→</button>
                             <button data-pos="bottom-left">↙</button><button data-pos="bottom-center">↓</button><button data-pos="bottom-right">↘</button>
                         </div>
                     </div>
-                    
-                    <div class="row2">
-                        <div class="field">
-                            <label>Warna Teks</label>
-                            <input type="color" id="wmColor" value="#ffffff">
-                        </div>
-                        <div class="field">
-                            <label>Font</label>
-                            <select id="wmFont" style="height:44px; padding:4px;">
-                                <option value="Arial, sans-serif">Arial</option>
-                                <option value="'Courier New', monospace">Courier</option>
-                                <option value="Georgia, serif">Georgia</option>
-                            </select>
-                        </div>
-                    </div>
-
                     <div class="field">
-                        <label>Ukuran <span class="val" id="sizeVal">30px</span></label>
-                        <input type="range" id="wmSize" min="10" max="150" value="30">
+                        <label>Warna teks</label>
+                        <input type="color" id="wmColor" value="#ffffff">
                     </div>
                     <div class="field">
-                        <label>Transparansi <span class="val" id="opVal">30%</span></label>
-                        <input type="range" id="wmOpacity" min="5" max="100" value="30">
+                        <label>Ukuran <span class="val" id="sizeVal">28px</span></label>
+                        <input type="range" id="wmSize" min="10" max="120" value="28">
+                    </div>
+                    <div class="field">
+                        <label>Transparansi <span class="val" id="opVal">28%</span></label>
+                        <input type="range" id="wmOpacity" min="5" max="100" value="28">
                     </div>
                     <div class="field" id="rotateField">
                         <label>Rotasi <span class="val" id="rotVal">-30°</span></label>
@@ -319,11 +459,11 @@
                     <div class="row2" id="spacingField">
                         <div class="field">
                             <label>Jarak X <span class="val" id="spxVal">150</span></label>
-                            <input type="range" id="wmSpaceX" min="40" max="600" value="150">
+                            <input type="range" id="wmSpaceX" min="40" max="1000" value="150">
                         </div>
                         <div class="field">
                             <label>Jarak Y <span class="val" id="spyVal">120</span></label>
-                            <input type="range" id="wmSpaceY" min="30" max="300" value="120">
+                            <input type="range" id="wmSpaceY" min="30" max="1000" value="120">
                         </div>
                     </div>
                     
@@ -333,64 +473,89 @@
                     </div>
                 </div>
                 
+                <!-- PRESET SECTION UPDATE -->
                 <div class="section">
-                    <h2>Penyimpanan Pengaturan</h2>
-                    <div class="presets">
-                        <button data-preset="stock">Gaya Stok</button>
-                        <button data-preset="subtle">Halus</button>
-                        <button data-preset="brand">Tegas</button>
+                    <h2>Preset & Penyimpanan</h2>
+                    <div class="presets" style="margin-bottom: 12px;">
+                        <button data-preset="stock">Gaya stok</button>
+                        <button data-preset="subtle">Samar</button>
+                        <button data-preset="brand">Merek</button>
                         <button data-preset="diagonal">Diagonal</button>
                     </div>
-                    <button id="savePresetBtn" style="width:100%; margin-bottom:12px;">+ Simpan Preset Saat Ini</button>
-                    <div id="customPresetsList" style="display:flex; flex-direction:column;"></div>
+                    <button id="savePresetBtn" style="width:100%; justify-content:center; margin-bottom:12px;">+ Simpan Pengaturan Saat Ini</button>
+                    <div id="customPresetsList" style="display:flex; flex-direction:column; gap:6px;">
+                        <!-- Custom Presets akan dimuat disini -->
+                    </div>
                 </div>
 
                 <div class="section">
-                    <h2>Unduh Hasil</h2>
+                    <h2>Logo (opsional)</h2>
+                    <div class="dropzone" id="logoDrop" style="padding:14px;">
+                        Unggah logo (PNG transparan disarankan)
+                    </div>
+                    <input type="file" id="logoInput" accept="image/*" style="display:none">
+                    <div class="field" style="margin-top:10px;">
+                        <label>Ukuran logo <span class="val" id="logoSizeVal">18%</span></label>
+                        <input type="range" id="logoSize" min="5" max="50" value="18">
+                    </div>
                     <div class="field">
-                        <label>Format Gambar</label>
+                        <label>Transparansi logo <span class="val" id="logoOpVal">80%</span></label>
+                        <input type="range" id="logoOpacity" min="10" max="100" value="80">
+                    </div>
+                    <button id="removeLogoBtn" style="width:100%;" disabled>Hapus logo</button>
+                </div>
+                <div class="section">
+                    <h2>Unduh</h2>
+                    <div class="row2" style="margin-bottom:10px;">
                         <select id="downloadFormat">
-                            <option value="image/jpeg">JPG (Ukuran Kecil)</option>
-                            <option value="image/png">PNG (Kualitas Tinggi)</option>
+                            <option value="image/png">PNG</option>
+                            <option value="image/jpeg">JPG</option>
                         </select>
+                        <button id="downloadBtn" class="primary" disabled>⬇ Unduh hasil</button>
                     </div>
-                    <div style="display:flex; flex-direction:column; gap:10px;">
-                        <button id="downloadBtn" disabled>Unduh Gambar Ini (1)</button>
-                        <button id="downloadAllBtn" class="primary" disabled>⬇ Unduh Semua Gambar</button>
-                    </div>
-                    <footer class="note" style="margin-top:16px;">
-                        Data aman! Aplikasi berjalan 100% secara offline di memori perangkat Anda.
+                    <footer class="note">
+                        Jika tombol unduh terblokir oleh browser Anda, silakan klik kanan (atau tahan) pada gambar lalu pilih "Simpan Gambar".
                     </footer>
                 </div>
             </div>
         </div>
     </div>
-
     <script>
         (function() {
             const canvas = document.getElementById('canvas');
             const ctx = canvas.getContext('2d');
             const emptyState = document.getElementById('emptyState');
-            
-            // State Aplikasi
-            let imagesData = []; // Array dari object: { file, baseImg, redactions: [] }
-            let currentIndex = -1; // Indeks gambar yang sedang aktif
-            
-            let currentAction = null;
+            const canvasWrap = document.getElementById('canvasWrap');
+            let img = null; // HTMLImageElement (base image)
+            let logoImg = null; // HTMLImageElement (optional logo)
+            let redactions = []; // {type:'box'|'stroke', ...}
+            let currentAction = null; // in-progress redaction
             let tool = 'none'; // 'box' | 'free' | 'none'
             let mode = 'tiled'; // 'tiled' | 'single'
             let singlePos = 'center';
 
             const state = {
-                text: 'CONFIDENTIAL', color: '#ffffff', size: 30, opacity: 30,
-                rotate: -30, spaceX: 150, spaceY: 120, font: "Arial, sans-serif",
-                bold: false, italic: false
+                text: 'MAIL STORE',
+                color: '#ffffff',
+                size: 28,
+                opacity: 28,
+                rotate: -30,
+                spaceX: 120,
+                spaceY: 90,
+                font: "Arial, sans-serif",
+                bold: false,
+                italic: false,
+                logoSize: 18,
+                logoOpacity: 80
             };
 
-            // Helpers
+            // ---------- helpers ----------
             function hexToRgba(hex, opacityPct) {
                 const h = hex.replace('#', '');
-                return `rgba(${parseInt(h.substring(0, 2), 16)},${parseInt(h.substring(2, 4), 16)},${parseInt(h.substring(4, 6), 16)},${opacityPct / 100})`;
+                const r = parseInt(h.substring(0, 2), 16);
+                const g = parseInt(h.substring(2, 4), 16);
+                const b = parseInt(h.substring(4, 6), 16);
+                return `rgba(${r},${g},${b},${opacityPct / 100})`;
             }
 
             function fontString(sizePx) {
@@ -398,23 +563,31 @@
             }
 
             function fitCanvasToImage(image) {
-                const MAX = 2000;
+                const MAX = 1600;
                 let w = image.naturalWidth, h = image.naturalHeight;
                 if (w > MAX || h > MAX) {
                     const s = Math.min(MAX / w, MAX / h);
-                    w = Math.round(w * s); h = Math.round(h * s);
+                    w = Math.round(w * s);
+                    h = Math.round(h * s);
                 }
-                canvas.width = w; canvas.height = h;
+                canvas.width = w;
+                canvas.height = h;
             }
 
             function drawRedactions(list) {
                 list.forEach(r => {
                     if (r.type === 'box') {
-                        ctx.fillStyle = '#000'; ctx.fillRect(r.x, r.y, r.w, r.h);
+                        ctx.fillStyle = '#000';
+                        ctx.fillRect(r.x, r.y, r.w, r.h);
                     } else if (r.type === 'stroke') {
-                        ctx.strokeStyle = '#000'; ctx.lineWidth = r.lineWidth;
-                        ctx.lineJoin = 'round'; ctx.lineCap = 'round'; ctx.beginPath();
-                        r.points.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+                        ctx.strokeStyle = '#000';
+                        ctx.lineWidth = r.lineWidth;
+                        ctx.lineJoin = 'round';
+                        ctx.lineCap = 'round';
+                        ctx.beginPath();
+                        r.points.forEach((p, i) => {
+                            i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+                        });
                         ctx.stroke();
                     }
                 });
@@ -424,25 +597,36 @@
                 if (!state.text) return;
                 ctx.save();
                 ctx.fillStyle = hexToRgba(state.color, state.opacity);
-                ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.textAlign = 'center';
                 if (mode === 'tiled') {
                     ctx.font = fontString(state.size);
                     const cx = canvas.width / 2, cy = canvas.height / 2;
                     const diag = Math.sqrt(canvas.width ** 2 + canvas.height ** 2);
-                    ctx.translate(cx, cy); ctx.rotate(state.rotate * Math.PI / 180);
-                    const stepX = Math.max(20, state.spaceX), stepY = Math.max(20, state.spaceY);
+                    ctx.translate(cx, cy);
+                    ctx.rotate(state.rotate * Math.PI / 180);
+                    const stepX = Math.max(20, state.spaceX);
+                    const stepY = Math.max(20, state.spaceY);
                     for (let y = -diag; y <= diag; y += stepY) {
                         let rowOffset = ((Math.round(y / stepY)) % 2 === 0) ? 0 : stepX / 2;
-                        for (let x = -diag + rowOffset; x <= diag; x += stepX) ctx.fillText(state.text, x, y);
+                        for (let x = -diag + rowOffset; x <= diag; x += stepX) {
+                            ctx.fillText(state.text, x, y);
+                        }
                     }
                 } else {
                     ctx.font = fontString(state.size);
                     const pad = Math.max(16, state.size * 0.6);
                     let x, y;
-                    if (singlePos.includes('left')) { x = pad; ctx.textAlign = 'left'; }
-                    else if (singlePos.includes('right')) { x = canvas.width - pad; ctx.textAlign = 'right'; }
-                    else { x = canvas.width / 2; ctx.textAlign = 'center'; }
-                    
+                    if (singlePos.includes('left')) {
+                        x = pad;
+                        ctx.textAlign = 'left';
+                    } else if (singlePos.includes('right')) {
+                        x = canvas.width - pad;
+                        ctx.textAlign = 'right';
+                    } else {
+                        x = canvas.width / 2;
+                        ctx.textAlign = 'center';
+                    }
                     if (singlePos.includes('top')) y = pad + state.size / 2;
                     else if (singlePos.includes('bottom')) y = canvas.height - pad - state.size / 2;
                     else y = canvas.height / 2;
@@ -451,233 +635,318 @@
                 ctx.restore();
             }
 
-            // Fungsi Utama Render
+            function drawLogo() {
+                if (!logoImg) return;
+                const targetW = canvas.width * (state.logoSize / 100);
+                const ratio = logoImg.naturalHeight / logoImg.naturalWidth;
+                const targetH = targetW * ratio;
+                const pad = canvas.width * 0.02;
+                ctx.save();
+                ctx.globalAlpha = state.logoOpacity / 100;
+                ctx.drawImage(logoImg, canvas.width - targetW - pad, canvas.height - targetH - pad, targetW, targetH);
+                ctx.restore();
+            }
+
             function render(previewAction) {
-                if (currentIndex === -1) return;
-                const data = imagesData[currentIndex];
-                
+                if (!img) return;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(data.baseImg, 0, 0, canvas.width, canvas.height);
-                
-                drawRedactions(data.redactions);
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                drawRedactions(redactions);
                 if (previewAction) drawRedactions([previewAction]);
-                
                 drawWatermark();
-                
-                // Update Tombol Status
-                const hasRedactions = data.redactions.length > 0;
-                document.getElementById('undoBtn').disabled = !hasRedactions;
-                document.getElementById('clearBtn').disabled = !hasRedactions;
-                
-                const hasImages = imagesData.length > 0;
-                document.getElementById('downloadBtn').disabled = !hasImages;
-                document.getElementById('downloadAllBtn').disabled = !hasImages;
-                if(hasImages) {
-                    document.getElementById('downloadBtn').textContent = `Unduh Gambar Ini (${currentIndex + 1}/${imagesData.length})`;
-                }
+                drawLogo();
+                updateToolButtons();
             }
 
-            // Pengelola Multi-Gambar
-            function loadImagesFile(files) {
-                const validFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
-                if (validFiles.length === 0) return;
-                
-                let loadedCount = 0;
-                validFiles.forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = e => {
-                        const imgObj = new Image();
-                        imgObj.onload = () => {
-                            imagesData.push({
-                                file: file,
-                                baseImg: imgObj,
-                                redactions: []
-                            });
-                            loadedCount++;
-                            // Jika semua file sudah ter-load
-                            if (loadedCount === validFiles.length) {
-                                if (currentIndex === -1) {
-                                    switchImage(0); // Buka gambar pertama
-                                } else {
-                                    renderGallery(); // Cukup update galeri
-                                }
-                            }
-                        };
-                        imgObj.src = e.target.result;
+            function updateToolButtons() {
+                document.getElementById('undoBtn').disabled = redactions.length === 0;
+                document.getElementById('clearBtn').disabled = redactions.length === 0;
+                document.getElementById('resetImgBtn').disabled = !img;
+                document.getElementById('downloadBtn').disabled = !img;
+            }
+
+            // ---------- image loading ----------
+            function loadImageFile(file) {
+                if (!file || !file.type.startsWith('image/')) return;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const image = new Image();
+                    image.onload = () => {
+                        img = image;
+                        redactions = [];
+                        fitCanvasToImage(image);
+                        canvas.style.display = 'block';
+                        emptyState.style.display = 'none';
+                        render();
                     };
-                    reader.readAsDataURL(file);
-                });
+                    image.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
             }
 
-            function switchImage(idx) {
-                currentIndex = idx;
-                const data = imagesData[idx];
-                fitCanvasToImage(data.baseImg);
-                
-                // Set Zoom ke 60% setiap ganti gambar
-                document.getElementById('zoom').value = 60;
-                canvas.style.width = '60%';
-                
-                canvas.style.display = 'block';
-                emptyState.style.display = 'none';
-                document.getElementById('galleryWrap').style.display = 'flex';
-                
-                renderGallery();
-                render();
+            function loadLogoFile(file) {
+                if (!file || !file.type.startsWith('image/')) return;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    const image = new Image();
+                    image.onload = () => {
+                        logoImg = image;
+                        document.getElementById('removeLogoBtn').disabled = false;
+                        render();
+                    };
+                    image.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
             }
 
-            function renderGallery() {
-                const wrap = document.getElementById('galleryThumbs');
-                wrap.innerHTML = '';
-                
-                imagesData.forEach((data, i) => {
-                    const imgEl = document.createElement('img');
-                    imgEl.className = 'thumb ' + (i === currentIndex ? 'active' : '');
-                    imgEl.src = data.baseImg.src;
-                    imgEl.onclick = () => switchImage(i);
-                    wrap.appendChild(imgEl);
-                });
-                
-                // Tombol Add di Galeri
-                const addBtn = document.createElement('div');
-                addBtn.className = 'thumb-add';
-                addBtn.innerHTML = '+';
-                addBtn.onclick = () => document.getElementById('fileInput').click();
-                wrap.appendChild(addBtn);
-            }
-
-            // Input File Events
+            // dropzone / file input
             const dropzone = document.getElementById('dropzone');
             const fileInput = document.getElementById('fileInput');
             dropzone.addEventListener('click', () => fileInput.click());
-            fileInput.addEventListener('change', e => loadImagesFile(e.target.files));
-            
-            ['dragover', 'dragenter'].forEach(evt => dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.style.borderColor = "var(--accent-primary)"; }));
-            ['dragleave', 'drop'].forEach(evt => dropzone.addEventListener(evt, e => { e.preventDefault(); dropzone.style.borderColor = "var(--border)"; }));
-            dropzone.addEventListener('drop', e => { e.preventDefault(); loadImagesFile(e.dataTransfer.files); });
+            fileInput.addEventListener('change', e => loadImageFile(e.target.files[0]));
 
-            // Toolbar Events (Sensor)
-            const toolButtons = { none: document.getElementById('toolNone'), box: document.getElementById('toolBox'), free: document.getElementById('toolFree') };
+            ['dragover', 'dragenter'].forEach(evt => dropzone.addEventListener(evt, e => {
+                e.preventDefault();
+                dropzone.classList.add('dragover');
+            }));
+
+            ['dragleave', 'drop'].forEach(evt => dropzone.addEventListener(evt, e => {
+                e.preventDefault();
+                dropzone.classList.remove('dragover');
+            }));
+
+            dropzone.addEventListener('drop', e => {
+                e.preventDefault();
+                loadImageFile(e.dataTransfer.files[0]);
+            });
+
+            const logoDrop = document.getElementById('logoDrop');
+            const logoInput = document.getElementById('logoInput');
+            logoDrop.addEventListener('click', () => logoInput.click());
+            logoInput.addEventListener('change', e => loadLogoFile(e.target.files[0]));
+
+            document.getElementById('removeLogoBtn').addEventListener('click', () => {
+                logoImg = null;
+                document.getElementById('removeLogoBtn').disabled = true;
+                render();
+            });
+
+            canvasWrap.addEventListener('paste', e => {
+                const items = e.clipboardData?.items;
+                if (!items) return;
+                for (const it of items) {
+                    if (it.type.startsWith('image/')) {
+                        loadImageFile(it.getAsFile());
+                        break;
+                    }
+                }
+            });
+
+            // ---------- toolbar: sensor tools ----------
+            const toolButtons = {
+                none: document.getElementById('toolNone'),
+                box: document.getElementById('toolBox'),
+                free: document.getElementById('toolFree')
+            };
+
             function setTool(t) {
                 tool = t;
                 Object.values(toolButtons).forEach(b => b.classList.remove('active'));
                 toolButtons[t].classList.add('active');
                 canvas.style.cursor = t === 'none' ? 'default' : 'crosshair';
             }
+
             toolButtons.none.addEventListener('click', () => setTool('none'));
             toolButtons.box.addEventListener('click', () => setTool('box'));
             toolButtons.free.addEventListener('click', () => setTool('free'));
-            
-            document.getElementById('undoBtn').addEventListener('click', () => { 
-                if(currentIndex > -1) imagesData[currentIndex].redactions.pop(); 
-                render(); 
-            });
-            document.getElementById('clearBtn').addEventListener('click', () => { 
-                if(currentIndex > -1) imagesData[currentIndex].redactions.length = 0; 
-                render(); 
+
+            document.getElementById('undoBtn').addEventListener('click', () => {
+                redactions.pop();
+                render();
             });
 
-            // Canvas Drawing Logic
+            document.getElementById('clearBtn').addEventListener('click', () => {
+                redactions = [];
+                render();
+            });
+
+            document.getElementById('resetImgBtn').addEventListener('click', () => {
+                redactions = [];
+                render();
+            });
+
+            // ---------- canvas drawing (redaction) ----------
             function canvasCoords(e) {
                 const rect = canvas.getBoundingClientRect();
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                return { x: (clientX - rect.left) * (canvas.width / rect.width), y: (clientY - rect.top) * (canvas.height / rect.height) };
+                return {
+                    x: (clientX - rect.left) * (canvas.width / rect.width),
+                    y: (clientY - rect.top) * (canvas.height / rect.height)
+                };
             }
 
-            let drawing = false, startPoint = null;
+            let drawing = false;
+            let startPoint = null;
+
             function pointerDown(e) {
-                if (currentIndex === -1 || tool === 'none') return;
-                // e.preventDefault();
-                drawing = true; const p = canvasCoords(e); startPoint = p;
-                if (tool === 'box') currentAction = { type: 'box', x: p.x, y: p.y, w: 0, h: 0 };
-                else currentAction = { type: 'stroke', points: [p], lineWidth: 30 }; // Dipertebal sedikit untuk mobile
+                if (!img || tool === 'none') return;
+                e.preventDefault();
+                drawing = true;
+                const p = canvasCoords(e);
+                startPoint = p;
+                if (tool === 'box') {
+                    currentAction = { type: 'box', x: p.x, y: p.y, w: 0, h: 0 };
+                } else {
+                    currentAction = { type: 'stroke', points: [p], lineWidth: 22 };
+                }
             }
+
             function pointerMove(e) {
                 if (!drawing || !currentAction) return;
-                e.preventDefault(); const p = canvasCoords(e);
+                e.preventDefault();
+                const p = canvasCoords(e);
                 if (currentAction.type === 'box') {
-                    currentAction.x = Math.min(startPoint.x, p.x); currentAction.y = Math.min(startPoint.y, p.y);
-                    currentAction.w = Math.abs(p.x - startPoint.x); currentAction.h = Math.abs(p.y - startPoint.y);
-                } else currentAction.points.push(p);
+                    currentAction.x = Math.min(startPoint.x, p.x);
+                    currentAction.y = Math.min(startPoint.y, p.y);
+                    currentAction.w = Math.abs(p.x - startPoint.x);
+                    currentAction.h = Math.abs(p.y - startPoint.y);
+                } else {
+                    currentAction.points.push(p);
+                }
                 render(currentAction);
             }
+
             function pointerUp() {
                 if (!drawing) return;
                 drawing = false;
-                if (currentAction && (currentAction.type === 'box' ? (currentAction.w > 5 && currentAction.h > 5) : currentAction.points.length > 1)) {
-                    imagesData[currentIndex].redactions.push(currentAction);
+                if (currentAction) {
+                    const valid = currentAction.type === 'box' ? (currentAction.w > 3 && currentAction.h > 3) : currentAction.points.length > 1;
+                    if (valid) redactions.push(currentAction);
                 }
-                currentAction = null; render();
+                currentAction = null;
+                render();
             }
-            
-            canvas.addEventListener('mousedown', pointerDown); canvas.addEventListener('mousemove', pointerMove); window.addEventListener('mouseup', pointerUp);
-            canvas.addEventListener('touchstart', pointerDown, { passive: false }); canvas.addEventListener('touchmove', pointerMove, { passive: false }); canvas.addEventListener('touchend', pointerUp);
 
-            // Slider Zoom
-            document.getElementById('zoom').addEventListener('input', e => { 
-                canvas.style.width = e.target.value + '%'; 
+            canvas.addEventListener('mousedown', pointerDown);
+            canvas.addEventListener('mousemove', pointerMove);
+            window.addEventListener('mouseup', pointerUp);
+
+            canvas.addEventListener('touchstart', pointerDown, { passive: false });
+            canvas.addEventListener('touchmove', pointerMove, { passive: false });
+            canvas.addEventListener('touchend', pointerUp);
+
+            // ---------- zoom ----------
+            document.getElementById('zoom').addEventListener('input', e => {
+                canvas.style.width = e.target.value + '%';
+                canvas.style.height = 'auto';
             });
 
-            // Watermark Data Binding
+            // ---------- watermark controls ----------
             const bind = (id, key, transform = (v) => v, after = () => {}) => {
-                document.getElementById(id).addEventListener('input', e => { state[key] = transform(e.target.value); after(e.target.value); render(); });
+                document.getElementById(id).addEventListener('input', e => {
+                    state[key] = transform(e.target.value);
+                    after(e.target.value);
+                    render();
+                });
             };
-            bind('wmText', 'text', v => v); bind('wmColor', 'color', v => v);
+
+            bind('wmText', 'text', v => v);
+            bind('wmColor', 'color', v => v);
             bind('wmSize', 'size', v => +v, v => document.getElementById('sizeVal').textContent = v + 'px');
             bind('wmOpacity', 'opacity', v => +v, v => document.getElementById('opVal').textContent = v + '%');
             bind('wmRotate', 'rotate', v => +v, v => document.getElementById('rotVal').textContent = v + '°');
             bind('wmSpaceX', 'spaceX', v => +v, v => document.getElementById('spxVal').textContent = v);
             bind('wmSpaceY', 'spaceY', v => +v, v => document.getElementById('spyVal').textContent = v);
             bind('wmFont', 'font', v => v);
+            bind('logoSize', 'logoSize', v => +v, v => document.getElementById('logoSizeVal').textContent = v + '%');
+            bind('logoOpacity', 'logoOpacity', v => +v, v => document.getElementById('logoOpVal').textContent = v + '%');
 
-            document.getElementById('boldBtn').addEventListener('click', function() { state.bold = !state.bold; this.classList.toggle('active', state.bold); render(); });
-            document.getElementById('italicBtn').addEventListener('click', function() { state.italic = !state.italic; this.classList.toggle('active', state.italic); render(); });
+            document.getElementById('boldBtn').addEventListener('click', function() {
+                state.bold = !state.bold;
+                this.classList.toggle('active', state.bold);
+                render();
+            });
 
-            // Pola
-            const modeTiled = document.getElementById('modeTiled'), modeSingle = document.getElementById('modeSingle');
-            const posGridWrap = document.getElementById('posGridWrap'), rotateField = document.getElementById('rotateField'), spacingField = document.getElementById('spacingField');
+            document.getElementById('italicBtn').addEventListener('click', function() {
+                state.italic = !state.italic;
+                this.classList.toggle('active', state.italic);
+                render();
+            });
+
+            // mode: tiled vs single
+            const modeTiled = document.getElementById('modeTiled');
+            const modeSingle = document.getElementById('modeSingle');
+            const posGridWrap = document.getElementById('posGridWrap');
+            const rotateField = document.getElementById('rotateField');
+            const spacingField = document.getElementById('spacingField');
+
             modeTiled.addEventListener('click', () => {
-                mode = 'tiled'; modeTiled.classList.add('active'); modeSingle.classList.remove('active');
-                posGridWrap.style.display = 'none'; rotateField.style.display = 'block'; spacingField.style.display = 'flex'; render();
+                mode = 'tiled';
+                modeTiled.classList.add('active');
+                modeSingle.classList.remove('active');
+                posGridWrap.style.display = 'none';
+                rotateField.style.display = '';
+                spacingField.style.display = '';
+                render();
             });
+
             modeSingle.addEventListener('click', () => {
-                mode = 'single'; modeSingle.classList.add('active'); modeTiled.classList.remove('active');
-                posGridWrap.style.display = 'block'; rotateField.style.display = 'none'; spacingField.style.display = 'none'; render();
+                mode = 'single';
+                modeSingle.classList.add('active');
+                modeTiled.classList.remove('active');
+                posGridWrap.style.display = '';
+                rotateField.style.display = 'none';
+                spacingField.style.display = 'none';
+                render();
             });
+
             document.querySelectorAll('#posGrid button').forEach(b => {
                 b.addEventListener('click', () => {
                     document.querySelectorAll('#posGrid button').forEach(x => x.classList.remove('active'));
-                    b.classList.add('active'); singlePos = b.dataset.pos; render();
+                    b.classList.add('active');
+                    singlePos = b.dataset.pos;
+                    render();
                 });
             });
 
-            // Presets Custom
+            // ---------- PRESETS LOGIC ----------
             const presets = {
-                stock: { color: '#ffffff', size: 30, opacity: 20, rotate: -30, spaceX: 160, spaceY: 130, bold: false, mode: 'tiled' },
-                subtle: { color: '#ffffff', size: 16, opacity: 12, rotate: -20, spaceX: 80, spaceY: 60, bold: false, mode: 'tiled' },
-                brand: { color: '#00E676', size: 40, opacity: 45, rotate: 0, spaceX: 250, spaceY: 180, bold: true, mode: 'tiled' },
-                diagonal: { color: '#FF4C4C', size: 50, opacity: 30, rotate: -40, spaceX: 300, spaceY: 200, bold: true, mode: 'tiled' }
+                stock: { color: '#ffffff', size: 26, opacity: 22, rotate: -30, spaceX: 130, spaceY: 100, bold: false, mode: 'tiled' },
+                subtle: { color: '#ffffff', size: 16, opacity: 14, rotate: -20, spaceX: 70, spaceY: 50, bold: false, mode: 'tiled' },
+                brand: { color: '#ffcc00', size: 34, opacity: 45, rotate: 0, spaceX: 220, spaceY: 160, bold: true, mode: 'tiled' },
+                diagonal: { color: '#ff3b30', size: 48, opacity: 30, rotate: -35, spaceX: 260, spaceY: 200, bold: true, mode: 'tiled' }
             };
-            
+
             let savedCustomPresets = JSON.parse(localStorage.getItem('stempel_presets') || '[]');
 
             function applyPreset(p) {
                 Object.assign(state, p);
-                document.getElementById('wmColor').value = state.color; document.getElementById('wmSize').value = state.size;
-                document.getElementById('sizeVal').textContent = state.size + 'px'; document.getElementById('wmOpacity').value = state.opacity;
-                document.getElementById('opVal').textContent = state.opacity + '%'; document.getElementById('wmRotate').value = state.rotate;
-                document.getElementById('rotVal').textContent = state.rotate + '°'; document.getElementById('wmSpaceX').value = state.spaceX;
-                document.getElementById('spxVal').textContent = state.spaceX; document.getElementById('wmSpaceY').value = state.spaceY;
+                
+                // Update UI elements to match loaded preset
+                document.getElementById('wmColor').value = state.color;
+                document.getElementById('wmSize').value = state.size;
+                document.getElementById('sizeVal').textContent = state.size + 'px';
+                document.getElementById('wmOpacity').value = state.opacity;
+                document.getElementById('opVal').textContent = state.opacity + '%';
+                document.getElementById('wmRotate').value = state.rotate;
+                document.getElementById('rotVal').textContent = state.rotate + '°';
+                document.getElementById('wmSpaceX').value = state.spaceX;
+                document.getElementById('spxVal').textContent = state.spaceX;
+                document.getElementById('wmSpaceY').value = state.spaceY;
                 document.getElementById('spyVal').textContent = state.spaceY;
-                document.getElementById('boldBtn').classList.toggle('active', state.bold); document.getElementById('italicBtn').classList.toggle('active', state.italic);
+                document.getElementById('boldBtn').classList.toggle('active', state.bold);
+                document.getElementById('italicBtn').classList.toggle('active', state.italic);
+
                 if (p.mode) {
                     if (p.mode === 'tiled') modeTiled.click();
                     else {
                         modeSingle.click();
                         if (p.singlePos) {
                             singlePos = p.singlePos;
-                            document.querySelectorAll('#posGrid button').forEach(x => x.classList.toggle('active', x.dataset.pos === singlePos));
+                            document.querySelectorAll('#posGrid button').forEach(x => {
+                                x.classList.toggle('active', x.dataset.pos === singlePos);
+                            });
                         }
                     }
                 }
@@ -685,83 +954,88 @@
             }
 
             document.querySelectorAll('.presets button[data-preset]').forEach(b => {
-                b.addEventListener('click', () => applyPreset(presets[b.dataset.preset]));
+                b.addEventListener('click', () => {
+                    const p = presets[b.dataset.preset];
+                    applyPreset(p);
+                });
             });
 
             function renderCustomPresets() {
                 const list = document.getElementById('customPresetsList');
                 list.innerHTML = '';
+                
                 if(savedCustomPresets.length === 0){
-                    list.innerHTML = '<div style="font-size:12px; color:var(--text-muted); text-align:center;">Belum ada preset tersimpan</div>';
+                    list.innerHTML = '<div style="font-size:11px; color:var(--muted); text-align:center;">Belum ada preset tersimpan</div>';
                     return;
                 }
+
                 savedCustomPresets.forEach((p, index) => {
-                    const row = document.createElement('div'); row.className = 'custom-preset-row';
-                    const btn = document.createElement('button'); btn.className = 'preset-btn'; btn.textContent = p.name;
+                    const row = document.createElement('div');
+                    row.className = 'custom-preset-row';
+
+                    const btn = document.createElement('button');
+                    btn.className = 'preset-btn';
+                    btn.textContent = p.name;
                     btn.addEventListener('click', () => applyPreset(p));
-                    const delBtn = document.createElement('button'); delBtn.className = 'del-btn danger'; delBtn.textContent = '×';
+
+                    const delBtn = document.createElement('button');
+                    delBtn.className = 'del-btn danger';
+                    delBtn.textContent = '×';
+                    delBtn.title = 'Hapus Preset';
                     delBtn.addEventListener('click', () => {
                         savedCustomPresets.splice(index, 1);
                         localStorage.setItem('stempel_presets', JSON.stringify(savedCustomPresets));
                         renderCustomPresets();
                     });
-                    row.appendChild(btn); row.appendChild(delBtn); list.appendChild(row);
+
+                    row.appendChild(btn);
+                    row.appendChild(delBtn);
+                    list.appendChild(row);
                 });
             }
+
             document.getElementById('savePresetBtn').addEventListener('click', () => {
-                const name = prompt('Berikan nama untuk preset ini:', `Preset ${savedCustomPresets.length + 1}`);
+                const defaultName = `Preset Saya ${savedCustomPresets.length + 1}`;
+                const name = prompt('Berikan nama untuk preset pengaturan ini:', defaultName);
                 if (!name) return;
-                savedCustomPresets.push({ name, mode, singlePos, ...state });
+
+                const newPreset = {
+                    name,
+                    mode,
+                    singlePos,
+                    ...state
+                };
+                
+                savedCustomPresets.push(newPreset);
                 localStorage.setItem('stempel_presets', JSON.stringify(savedCustomPresets));
                 renderCustomPresets();
             });
+
+            // Inisialisasi preset custom saat pertama kali load
             renderCustomPresets();
 
-            // Fungsi Download
-            function triggerDownload(indexToDownload) {
-                // Render gambar spesifik ke kanvas secara diam-diam
-                const backupIndex = currentIndex;
-                currentIndex = indexToDownload;
-                render(); 
-                
-                const format = document.getElementById('downloadFormat').value;
-                const ext = format === 'image/png' ? 'png' : 'jpg';
-                const a = document.createElement('a');
-                a.href = canvas.toDataURL(format, 0.95);
-                
-                // Penamaan file dinamis
-                const origName = imagesData[indexToDownload].file.name.split('.')[0];
-                a.download = `${origName}_stempel.${ext}`;
-                
-                document.body.appendChild(a); 
-                a.click(); 
-                document.body.removeChild(a);
-                
-                // Kembalikan view ke semula
-                currentIndex = backupIndex;
-                render();
-            }
-
+            // ---------- FIX DOWNLOAD ----------
             document.getElementById('downloadBtn').addEventListener('click', () => {
-                if (currentIndex > -1) triggerDownload(currentIndex);
-            });
-
-            document.getElementById('downloadAllBtn').addEventListener('click', async () => {
-                if (imagesData.length === 0) return;
-                const btn = document.getElementById('downloadAllBtn');
-                btn.disabled = true;
-                btn.textContent = "Memproses...";
+                if (!img) return;
                 
-                for(let i = 0; i < imagesData.length; i++){
-                    triggerDownload(i);
-                    // Jeda 500ms antar file agar browser (Chrome/Android) tidak memblokir multi-download
-                    await new Promise(resolve => setTimeout(resolve, 500)); 
+                try {
+                    const format = document.getElementById('downloadFormat').value;
+                    const ext = format === 'image/png' ? 'png' : 'jpg';
+                    const url = canvas.toDataURL(format, 0.95);
+                    
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `watermarked.${ext}`;
+                    
+                    // MENYEMATKAN ELEMEN KE DOM SANGAT PENTING AGAR FUNGSI KLIK BERJALAN DI BEBERAPA BROWSER
+                    document.body.appendChild(a); 
+                    a.click();
+                    document.body.removeChild(a);
+                } catch (e) {
+                    console.error("Download failed:", e);
+                    alert("Aksi download diblokir oleh browser. Anda bisa menyimpannya secara manual dengan klik kanan (atau tahan) pada gambar lalu pilih 'Simpan Gambar/Save Image'.");
                 }
-                
-                btn.textContent = "⬇ Unduh Semua Gambar";
-                btn.disabled = false;
             });
-
         })();
     </script>
 </body>
